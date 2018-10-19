@@ -20,7 +20,7 @@ command:
 e.g. time mpiexec ./main 20K-keys.txt 20480
 
 Slurm Method:
-You can write a slurm to request gpu partition, load modules and compile.
+Please refer to the example slurm file "test_256.slurm".
 
 Data Set:
 256-keys.txt: 256 keys
