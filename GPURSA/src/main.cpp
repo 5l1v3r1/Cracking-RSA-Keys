@@ -24,7 +24,7 @@ static mpz_t n1, n2, p, q1, q2, d1, d2;
 static int X_MASKS[BLOCK_DIM] = { 0x1111, 0x2222, 0x4444, 0x8888 };
 static int Y_MASKS[BLOCK_DIM] = { 0x000F, 0x00F0, 0x0F00, 0xF000 };
 
-// This method is to retrieve keys from the given filename
+// This method is to retrieve keys from the given file
 inline void retrieveKeys(const char *fileName, integer *keys, int num){
         FILE *file = fopen(fileName, "r");
         // create an integer with multiple precision
@@ -76,8 +76,8 @@ int main(int argc, char* argv[])
     mpz_inits(n1, n2, p, q1, q2, d1, d2, NULL);
 
     //create grids and blocks.
-    dim3 gridDim(GRID_DIM / BLOCK_DIM, GRID_DIM / BLOCK_DIM);
-    dim3 blockDim(WARP_DIM, BLOCK_DIM, BLOCK_DIM);
+    dim3 grid_dim(GRID_DIM / BLOCK_DIM, GRID_DIM / BLOCK_DIM,1);
+    dim3 block_dim(WARP_DIM, BLOCK_DIM, BLOCK_DIM);
     int numOfGrids = NUM_GRIDS(keyNum);
 
     for(int i=0; i<numOfGrids; i++){
@@ -85,13 +85,13 @@ int main(int argc, char* argv[])
             //record the block which has a pair of keys which are not coprime.
             cudaSafe(cudaMemset(block_noCoprime, 0, BLOCKS_PER_GRID * BLOCKS_PER_GRID * sizeof(uint16_t)));
 
-            cudaWrapper(gridDim, blockDim, block_keys, block_noCoprime, i, j, GRID_DIM, keyNum);
+            cudaWrapper(grid_dim, block_dim, block_keys, block_noCoprime, i, j, GRID_DIM, keyNum);
 
             cudaSafe(cudaPeekAtLastError());
             cudaSafe(cudaDeviceSynchronize());
 
             cudaSafe(cudaMemcpy(noCoprime,block_noCoprime,BLOCKS_PER_GRID * BLOCKS_PER_GRID * sizeof(uint16_t),cudaMemcpyDeviceToHost));
-
+            //Invoke the key cracking method to output the cracked keys
             crackPrivateKeys(keys, noCoprime, i, j, file_outputstream);
 
         }

@@ -1,3 +1,4 @@
+//This code is from https://github.com/mitchellwrosen/rsa-crack-cuda/blob/master/parallel/src/rsa.cpp
 #include "rsa.h"
 
 #include <stdlib.h>

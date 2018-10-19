@@ -12,6 +12,7 @@ __device__ void cuSubtract(volatile uint32_t *x, volatile uint32_t *y, volatile 
 
 __global__ void cuda_crackKeys(const integer *keys, uint16_t *noCoprime, int gridRow, int gridCol, int grid_Dim, int keyNum) {
 
+  // These two shared arrays are used to store key chunks.
   __shared__ volatile uint32_t keyOne[BLOCK_DIM][BLOCK_DIM][32];
   __shared__ volatile uint32_t keyTwo[BLOCK_DIM][BLOCK_DIM][32];
 
@@ -22,12 +23,12 @@ __global__ void cuda_crackKeys(const integer *keys, uint16_t *noCoprime, int gri
 
     keyOne[threadIdx.y][threadIdx.z][threadIdx.x] = keys[keyX].ints[threadIdx.x];
     keyTwo[threadIdx.y][threadIdx.z][threadIdx.x] = keys[keyY].ints[threadIdx.x];
-    // calculate gcd
+
     gcd(keyOne[threadIdx.y][threadIdx.z], keyTwo[threadIdx.y][threadIdx.z]);
 
     if (threadIdx.x == 31) {
       keyTwo[threadIdx.y][threadIdx.z][threadIdx.x] -= 1;
-      // If gcd >1, it means they are coPrime
+       //If gcd of two keys is larger than 1.
       if (__any(keyTwo[threadIdx.y][threadIdx.z][threadIdx.x])) {
         int notCoprimeBlockNdx = blockIdx.y * gridDim.x + blockIdx.x;
         noCoprime[notCoprimeBlockNdx] |= 1 << threadIdx.z * BLOCK_DIM + threadIdx.y;
@@ -40,6 +41,7 @@ void cudaWrapper(dim3 gridDim, dim3 blockDim, integer* block_keys, uint16_t* blo
       cuda_crackKeys<<<gridDim, blockDim>>>(block_keys, block_noCoprime, gridRow, gridCol, grid_dim, keyNum);
 }
 
+//The following algorithm is referred to Noriyuki's paper.
 __device__ void gcd(volatile uint32_t *x, volatile uint32_t *y) {
   int tid = threadIdx.x;
 
