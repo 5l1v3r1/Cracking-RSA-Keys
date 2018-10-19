@@ -1,3 +1,6 @@
+/*The code is from sequential RSA cracking code on https://github.com/mitchellwrosen/rsa-crack-cuda/tree/master/sequential
+*/
+
 #include "mygmp.h"
 
 #include <stdio.h>

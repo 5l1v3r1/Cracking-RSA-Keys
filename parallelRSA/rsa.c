@@ -1,3 +1,5 @@
+/*The code is from sequential RSA cracking code on https://github.com/mitchellwrosen/rsa-crack-cuda/tree/master/sequential
+*/
 #include "rsa.h"
 
 #include <time.h>
